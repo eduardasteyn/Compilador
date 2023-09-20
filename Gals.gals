@@ -1,0 +1,167 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = Java
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+ScannerCaseSensitive = true
+ScannerTable = Compact
+Input = Stream
+Parser = LL
+#RegularDefinitions
+letras: [a-z]|[A-Z]
+num: [0-9]
+dig: [1-9]
+caracter: {letras}|{num}|_({letras}|{num})+
+simbolos: [snt]
+#Tokens
+identificador: {letras}{caracter}*
+constanteInt: {num}*({dig}+d{dig}+){num}* |{num}+
+constanteFloat: {num}*\.({num}*({dig}+d{dig}+){num}*|{num}+)
+constanteChar: \\{simbolos}
+constanteString: \"([^\"\n\\])*\"
+
+:! #[^\n]*
+:! \[\n[^\[\]]*\n\]
+
+
+//palavras reservadas
+boolean = identificador: "boolean"
+break = identificador: "break"
+char = identificador: "char"
+do = identificador: "do"
+else = identificador: "else"
+end = identificador: "end"
+false = identificador: "false"
+float = identificador: "float"
+fun = identificador: "fun"
+if = identificador: "if"
+int = identificador: "int"
+main = identificador: "main"
+print = identificador: "print"
+println = identificador: "println"
+readln = identificador: "readln"
+string = identificador: "string"
+true = identificador: "true"
+val = identificador: "val"
+var = identificador: "var"
+while = identificador: "while"
+
+//Simbolos especiais
+":" 
+"," 
+";" 
+"=" 
+"("
+")" 
+"{" 
+"}" 
+"==" 
+"!=" 
+"<" 
+">" 
+"+" 
+"-" 
+"*" 
+"%" 
+"=="
+">" 
+"<" 
+"!=" 
+"&&" 
+"||"
+"!" 
+"/"
+"\"
+
+//Ignorar caracteres de formatao
+:![\s\n\t]
+
+#NonTerminals
+<programa>
+<lista_instrucoes>
+<lista_instrucoes1>
+<instrucoes>
+<constante>
+<variavel>
+<lista_identificadores>
+<lista_identificadores1>
+<tipo>
+<valor>
+<comando>
+<atribuicao>
+<entrada_dados>
+<saida_dados>
+<lista_expressoes>
+<lista_expressoes1>
+<selecao>
+<cmd_else>
+<lista_comandos>
+<lista_comandos1>
+<repeticao>
+<v>
+<v1>
+<v2>
+<vFinal>
+<constante_string>
+<expressao>
+<expressao_>
+<elemento>
+<relacional>
+<relacional_>
+<operador_relacional>
+<aritmetica>
+<aritmetica_> 
+<termo>
+<termo_> 
+<fator>
+#Grammar
+// Eduarda Jeniffer Steilein Gislon
+<programa> 		::= #15 fun main "{" <lista_instrucoes> "}" #16 ;
+<lista_instrucoes> 	::= <instrucoes> <lista_instrucoes1>;
+<lista_instrucoes1>  	::= î | <lista_instrucoes>;
+<instrucoes> 		::= <constante>|<variavel>|<comando>;
+<constante> 		::= val <vFinal>;
+<variavel> 		::= var <vFinal>;
+<comando> 		::= <atribuicao>|<entrada_dados>|<saida_dados>|<selecao>|<repeticao>|break ";";
+<lista_identificadores> 	::= identificador #32 <lista_identificadores1>;
+<lista_identificadores1>::= ","<lista_identificadores> | î ;
+<tipo> 			::= int|float|char|string|boolean;
+<valor>			::= constanteInt|constanteFloat|constanteChar|constanteString|true|false;
+<vFinal>		::= <lista_identificadores> <v> ";";
+<v> 			::= <v1> <v2>;
+<v1> 			::=  ":" <tipo> #30 #31 | "=" <valor> ;
+<v2> 			::=  î | "=" <valor>;
+<atribuicao>		::= identificador #32 "=" <expressao> #34";";
+<entrada_dados> 		::= readln "("<constante_string> <lista_identificadores> #35 ")" ";"; 
+<constante_string> 	::= constanteString #22 #14 "," | î;
+<saida_dados> 		::= print "(" <lista_expressoes> ")" ";"| println "(" <lista_expressoes> ")" #17 ";";
+<lista_expressoes> 	::= <expressao> #14 <lista_expressoes1>;
+<lista_expressoes1>      ::= î | "," <lista_expressoes>;
+<selecao>		::= if "(" <expressao> ")" #24 <lista_comandos> <cmd_else> end #26 ";";
+<cmd_else> 		::= else #25 <lista_comandos>| î;
+<lista_comandos> 		::= <comando><lista_comandos1>;
+<lista_comandos1>		::= <lista_comandos> | î;
+<repeticao> 		::= #27 do <lista_comandos> while "(" <expressao> ")" #28 end ";";
+<expressao> 		::= <elemento> <expressao_> ;
+<expressao_> 		::= î | "&&" <elemento> #18 <expressao_> | "||" <elemento> #19 <expressao_> ;
+<elemento> 		::= <relacional> | true #11 | false #12 | "!" <elemento> #13 ;
+<relacional> 		::= <aritmetica> <relacional_> ;
+<relacional_> 		::= î | <operador_relacional> #9 <aritmetica> #10;
+<operador_relacional> 	::= "==" | "!=" | "<" | ">" ;
+<aritmetica> 		::= <termo> <aritmetica_> ;
+<aritmetica_> 		::= î | "+" <termo> #1 <aritmetica_> | "-" <termo> #2 <aritmetica_> ;
+<termo> 			::= <fator> <termo_> ;
+<termo_> 		::= î | "*" <fator> #3 <termo_> 
+ 			      | "/" <fator> #4 <termo_> 
+ 			      | "%" <fator> #20 <termo_> ;
+<fator> 			::= identificador #33 |
+			    constanteInt #5| 
+ 			    constanteFloat #6 | 
+      			    constanteChar #21|
+			    constanteString #22| 
+ 			    "(" <expressao> ")" |
+            		    "+" <fator> #7| 
+                               "-" <fator> #8 ;
+ 
